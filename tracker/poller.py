@@ -78,6 +78,23 @@ def catch_up(rpc, market, history_path, latest, days=config.HISTORY_DAYS,
     return done
 
 
+def catch_up_to_head(rpc, market, history_path, days, sleep=time.sleep, max_passes=5) -> int:
+    """Run catch_up with a fresh head until a pass adds nothing (or max_passes).
+
+    A long catch-up lets new blocks pass by; repeating closes that gap before
+    the live poll. Returns the total number of snapshots added.
+    """
+    total = 0
+    for n in range(1, max_passes + 1):
+        if n > 1:
+            log.info("catch-up pass %d: the chain moved on while catching up", n)
+        added = catch_up(rpc, market, history_path, rpc.latest_block_number(), days, sleep=sleep)
+        total += added
+        if added == 0:
+            break
+    return total
+
+
 def _stats(state, market):
     return compute_stats(usable_history(state.history_path), state.days, config.DRIFT_THRESHOLD,
                          [p.fee for p in market.pools])
@@ -163,7 +180,16 @@ def run_loop(rpc, market, state, sleep=time.sleep, clock=time.monotonic,
     next_at = clock()
     polls = 0
     while max_polls is None or polls < max_polls:
-        safe_poll(rpc, market, state, sleep)
+        try:
+            safe_poll(rpc, market, state, sleep)
+        except Exception:  # not BaseException: Ctrl+C must still exit
+            # Safe to log: the RPC layer wraps transport errors as RpcError,
+            # whose messages are already redacted (no API key).
+            log.exception("unexpected error in poll; continuing")
+            try:
+                _write_error_cache(state)
+            except Exception:
+                log.exception("could not write the error cache")
         polls += 1
         next_at += interval
         now = clock()
@@ -196,7 +222,7 @@ def _run(args, sleep):
         if safe_poll(rpc, market, state, sleep) is None:
             raise RpcError("poll failed twice, see the log above")
         return
-    added = catch_up(rpc, market, state.history_path, latest, args.days, sleep=sleep)
+    added = catch_up_to_head(rpc, market, state.history_path, args.days, sleep=sleep)
     _spend(rpc, state)
     if args.backfill:
         log.info("backfill done: %d snapshots added", added)

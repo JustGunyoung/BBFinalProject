@@ -136,3 +136,72 @@ def test_run_loop_schedule(tmp_path):
 
     poller.run_loop(rpc, market, state, sleep=sleep, clock=clock, interval=300, max_polls=2)
     assert sleeps == [300, 300]
+
+
+def _fast_loop(rpc, market, state, max_polls):
+    poller.run_loop(rpc, market, state, sleep=lambda s: None, clock=lambda: 0.0,
+                    interval=300, max_polls=max_polls)
+
+
+def test_run_loop_survives_unexpected_error(tmp_path, monkeypatch):
+    rpc, market, state = _setup(tmp_path)
+    poller.poll_once(rpc, market, state)  # so there is a last snapshot
+    real = poller.poll_once
+    calls = []
+
+    def flaky(*args):
+        calls.append(1)
+        if len(calls) == 1:
+            raise ValueError("bad multicall")
+        return real(*args)
+
+    monkeypatch.setattr(poller, "poll_once", flaky)
+    _fast_loop(rpc, market, state, 2)  # must not raise
+    assert len(calls) == 2
+    assert len(read_history(state.history_path)) == 2  # setup poll + second loop poll
+    # the second poll succeeded and rewrote the cache without an error flag
+    assert json.loads(state.cache_path.read_text()).get("rpc_status") != "error"
+
+
+def test_run_loop_writes_error_cache_after_unexpected_error(tmp_path, monkeypatch):
+    rpc, market, state = _setup(tmp_path)
+    poller.poll_once(rpc, market, state)
+
+    def boom(*args):
+        raise ValueError("bad multicall")
+
+    monkeypatch.setattr(poller, "poll_once", boom)
+    _fast_loop(rpc, market, state, 1)
+    cache = json.loads(state.cache_path.read_text())
+    assert cache["rpc_status"] == "error"
+    assert cache["block"] == LATEST
+
+
+def test_run_loop_keyboard_interrupt_propagates(tmp_path, monkeypatch):
+    rpc, market, state = _setup(tmp_path)
+
+    def stop(*args):
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(poller, "poll_once", stop)
+    with pytest.raises(KeyboardInterrupt):
+        _fast_loop(rpc, market, state, 2)
+
+
+def test_catch_up_to_head_repeats_until_nothing_added(tmp_path):
+    days = 1
+    first_latest = LATEST
+    second_latest = LATEST + 3 * STEP
+    oldest = first_latest - days * config.BLOCKS_PER_DAY
+    blocks = list(range(oldest, second_latest - STEP + 1, STEP))
+    rpc = build_fake_chain(blocks)
+    market = load_pools(rpc, blocks[0])
+    # latest_block_number: first pass sees LATEST, later passes see second_latest
+    heads = iter([first_latest, second_latest, second_latest])
+    rpc.latest_block_number = lambda: next(heads)
+    path = tmp_path / "h.jsonl"
+    total = poller.catch_up_to_head(rpc, market, path, days, sleep=lambda s: None)
+    first = len(range(oldest, first_latest - STEP + 1, STEP))
+    assert total == len(blocks) > first
+    assert [s["block"] for s in read_history(path)] == blocks
+    assert next(heads, None) is None  # stopped right after the pass that added 0
