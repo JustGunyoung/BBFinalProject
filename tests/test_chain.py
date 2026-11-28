@@ -40,7 +40,7 @@ def test_wrong_chain():
 
 def test_zero_address_pool():
     rpc = build_fake_chain([BLOCK])
-    data = abi.GET_POOL.encode(config.LINK, config.WETH, 3000)
+    data = abi.GET_POOL.encode(config.LINK, config.WETH, FAKE_POOLS[0].fee)
     rpc.set_call(config.FACTORY, data, encode_result(abi.GET_POOL, config.ZERO_ADDRESS))
     with pytest.raises(PoolCheckFailed, match="no LINK/WETH pool"):
         load_pools(rpc, BLOCK)
@@ -49,8 +49,8 @@ def test_zero_address_pool():
 @pytest.mark.parametrize(
     "fn, value, message",
     [
-        (abi.POOL_FEE, 500, "fee"),
-        (abi.POOL_TICK_SPACING, 10, "tick spacing"),
+        (abi.POOL_FEE, 1, "fee"),  # no tier uses fee 1
+        (abi.POOL_TICK_SPACING, 1, "tick spacing"),  # no tier uses spacing 1
         (abi.POOL_TOKEN0, config.WETH, "pair"),
         (abi.POOL_TOKEN1, config.LINK, "pair"),
         (abi.POOL_FACTORY, config.QUOTER_V2, "factory"),
@@ -86,7 +86,7 @@ def test_build_multicall_order():
     assert targets == [a, a, q, q, b, b, q, q, config.CHAINLINK_LINK_ETH]
     assert calls[0][2] == abi.POOL_SLOT0.selector
     buy = abi.QUOTE_EXACT_INPUT_SINGLE.encode(
-        (config.WETH, config.LINK, config.BUY_SIZE_WETH, 3000, 0)
+        (config.WETH, config.LINK, config.BUY_SIZE_WETH, FAKE_POOLS[0].fee, 0)
     )
     assert calls[2][2] == buy
 

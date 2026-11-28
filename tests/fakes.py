@@ -26,8 +26,10 @@ BASE_BLOCK = 23_000_000
 BASE_TIMESTAMP = 1_764_000_000
 FAKE_BASE_FEE = 8_500_000_000
 
-# Made-up pool addresses (checksummed), one per entry in config.FEE_TIERS.
+# Made-up pool addresses (checksummed) for every candidate tier, so the fakes
+# follow whichever two tiers config.FEE_TIERS picks.
 FAKE_POOL_ADDRESSES = {
+    500: Web3.to_checksum_address("0x" + "a5" * 20),
     3000: Web3.to_checksum_address("0x" + "a3" * 20),
     10000: Web3.to_checksum_address("0x" + "a1" * 20),
 }
