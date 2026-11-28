@@ -102,7 +102,7 @@ Definitions:
 5. **The server keeps the last good copy.** Re-read only when mtime changes; on a failed read serve the
    last good copy with `cache_status: "stale_read"`; with none, return `{"status": "no_data"}`.
 6. **Split files.** Each member edits only their own modules; `data/` is git-ignored and the 7-day
-   backfill is shared once as `history_seed.jsonl`.
+   backfill is shared once as `data/history_seed.jsonl`.
 
 ## Example `cache.json`
 
@@ -119,7 +119,7 @@ Numbers are illustrative only.
   "sell_size_link": "50000000000000000000",
   "pools": [
     {
-      "fee": 3000,
+      "fee": 500,
       "pool": "0xaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaB",
       "sqrt_price_x96": "1771595571142957166518320255467520",
       "tick": -52000,
@@ -130,7 +130,7 @@ Numbers are illustrative only.
       "quote_sell_weth_out": "255100000000000000"
     },
     {
-      "fee": 10000,
+      "fee": 3000,
       "pool": "0x1212121212121212121212121212121212121212",
       "sqrt_price_x96": "1771800000000000000000000000000000",
       "tick": -51990,
@@ -157,15 +157,15 @@ Numbers are illustrative only.
     "drift": {"threshold": 0.005, "compared": 2016, "rate": 0.12},
     "buy": {
       "compared": 2010,
-      "wins": {"3000": 1650, "10000": 350, "tie": 10},
-      "win_rate": {"3000": 0.8209, "10000": 0.1741},
+      "wins": {"500": 1650, "3000": 350, "tie": 10},
+      "win_rate": {"500": 0.8209, "3000": 0.1741},
       "median_advantage": 0.0015,
       "max_advantage": 0.02
     },
     "sell": {
       "compared": 2012,
-      "wins": {"3000": 900, "10000": 1100, "tie": 12},
-      "win_rate": {"3000": 0.4473, "10000": 0.5467},
+      "wins": {"500": 900, "3000": 1100, "tie": 12},
+      "win_rate": {"500": 0.4473, "3000": 0.5467},
       "median_advantage": 0.0011,
       "max_advantage": 0.015
     }

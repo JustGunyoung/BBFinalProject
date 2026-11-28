@@ -55,5 +55,5 @@ CU_COSTS = {"eth_call": 26, "get_block": 16, "block_number": 10, "chain_id": 0}
 DATA_DIR = PROJECT_ROOT / "data"
 HISTORY_PATH = DATA_DIR / "history.jsonl"
 CACHE_PATH = DATA_DIR / "cache.json"
-SEED_PATH = PROJECT_ROOT / "history_seed.jsonl"
+SEED_PATH = DATA_DIR / "history_seed.jsonl"
 SCHEMA_VERSION = 1

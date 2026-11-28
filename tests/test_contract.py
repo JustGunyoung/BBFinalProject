@@ -7,6 +7,8 @@ import pytest
 from jsonschema import Draft202012Validator
 from referencing import Registry, Resource
 
+from tracker.chain import load_pools, snapshot
+from tracker.rpc import FixtureRpc
 from tracker.stats import compute_stats
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -140,10 +142,15 @@ def test_web_sample_state_validates():
 
 
 def test_fixture_snapshot_validates():
-    # TODO(fixture): once tests/fixtures/ holds a recorded block file, build a real
-    # snapshot via tracker.chain.snapshot(FixtureRpc(...), pools, block) and validate
-    # it with snapshot_validator(). Skipped until then.
     fixtures = ROOT / "tests" / "fixtures"
-    if not fixtures.exists() or not list(fixtures.glob("*.json")):
-        pytest.skip("TODO(fixture): no recorded fixture in tests/fixtures/ yet")
-    pytest.skip("TODO(fixture): fixture exists but snapshot-building test is not written yet")
+    files = sorted(p for p in fixtures.glob("block_*.json") if not p.name.endswith(".expected.json"))
+    if not files:
+        pytest.skip("no recorded fixture in tests/fixtures/")
+    rpc = FixtureRpc(files[-1])
+    block = rpc.latest_block_number()
+    market = load_pools(rpc, block)
+    snap = snapshot(rpc, market.pools, block, market.oracle_decimals)
+    snapshot_validator().validate(snap)  # a history line
+    cache = {**snap, "stats": compute_stats([snap])}
+    validator().validate(cache)  # cache.json
+    assert cache["stats"]["snapshots"] == 1
