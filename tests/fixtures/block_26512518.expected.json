@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "block": 26512518,
+  "timestamp": 1795854359,
+  "base_fee_wei": "41784525",
+  "rpc_status": "ok",
+  "buy_size_weth": "300000000000000000",
+  "sell_size_link": "50000000000000000000",
+  "pools": [
+    {
+      "fee": 500,
+      "pool": "0x5d4F3C6fA16908609BAC31Ff148Bd002AA6b8c83",
+      "sqrt_price_x96": "5896669154214668055383428462",
+      "tick": -51962,
+      "liquidity": "15283191174551569828042",
+      "price_weth_per_link": 0.005539293224809394,
+      "price_check": "ok",
+      "quote_buy_link_out": "54117188788175333347",
+      "quote_sell_weth_out": "276758824286515517"
+    },
+    {
+      "fee": 3000,
+      "pool": "0xa6Cc3C2531FdaA6Ae1A3CA84c2855806728693e8",
+      "sqrt_price_x96": "5892519232138560777118802999",
+      "tick": -51976,
+      "liquidity": "339298215154150844287535",
+      "price_weth_per_link": 0.0055314991479875845,
+      "price_check": "ok",
+      "quote_buy_link_out": "54071499774148654823",
+      "quote_sell_weth_out": "275742219463716314"
+    }
+  ],
+  "oracle_raw": {
+    "round_id": "92233720368547764516",
+    "answer": "5570780000000000",
+    "started_at": 1795835146,
+    "updated_at": 1795835159,
+    "answered_in_round": "92233720368547764516",
+    "decimals": 18
+  }
+}
