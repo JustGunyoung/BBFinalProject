@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://uniswap-tracker.example/schemas/cache.schema.json",
+  "title": "Uniswap LINK/WETH tracker cache.json",
+  "description": "cache.json = one snapshot plus a 'stats' object. A history.jsonl line is a snapshot only: validate it against #/$defs/snapshot.",
+  "type": "object",
+  "required": ["schema_version", "block", "timestamp", "base_fee_wei", "rpc_status", "buy_size_weth", "sell_size_link", "pools", "oracle_raw", "stats"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": 1},
+    "block": {"$ref": "#/$defs/uint_int"},
+    "timestamp": {"$ref": "#/$defs/uint_int"},
+    "base_fee_wei": {"$ref": "#/$defs/uint_str"},
+    "rpc_status": {"$ref": "#/$defs/rpc_status"},
+    "buy_size_weth": {"$ref": "#/$defs/uint_str"},
+    "sell_size_link": {"$ref": "#/$defs/uint_str"},
+    "pools": {"$ref": "#/$defs/pools"},
+    "oracle_raw": {"$ref": "#/$defs/oracle_raw"},
+    "stats": {"$ref": "#/$defs/stats"}
+  },
+  "$defs": {
+    "uint_int": {"type": "integer", "minimum": 0},
+    "uint_str": {"type": "string", "pattern": "^[0-9]+$"},
+    "uint_str_or_null": {"type": ["string", "null"], "pattern": "^[0-9]+$"},
+    "address": {"type": "string", "pattern": "^0x[0-9a-fA-F]{40}$"},
+    "rpc_status": {"enum": ["ok", "error"]},
+    "pool": {
+      "type": "object",
+      "required": ["fee", "pool", "sqrt_price_x96", "tick", "liquidity", "price_weth_per_link", "price_check", "quote_buy_link_out", "quote_sell_weth_out"],
+      "additionalProperties": false,
+      "properties": {
+        "fee": {"type": "integer", "minimum": 1},
+        "pool": {"$ref": "#/$defs/address"},
+        "sqrt_price_x96": {"$ref": "#/$defs/uint_str_or_null"},
+        "tick": {"type": ["integer", "null"]},
+        "liquidity": {"$ref": "#/$defs/uint_str_or_null"},
+        "price_weth_per_link": {"type": ["number", "null"]},
+        "price_check": {"enum": ["ok", "failed", "missing"]},
+        "quote_buy_link_out": {"$ref": "#/$defs/uint_str_or_null"},
+        "quote_sell_weth_out": {"$ref": "#/$defs/uint_str_or_null"}
+      }
+    },
+    "pools": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {"$ref": "#/$defs/pool"}
+    },
+    "oracle_raw": {
+      "type": ["object", "null"],
+      "required": ["round_id", "answer", "started_at", "updated_at", "answered_in_round", "decimals"],
+      "additionalProperties": false,
+      "properties": {
+        "round_id": {"type": "string", "pattern": "^[0-9]+$"},
+        "answer": {"type": "string", "pattern": "^-?[0-9]+$"},
+        "started_at": {"$ref": "#/$defs/uint_int"},
+        "updated_at": {"$ref": "#/$defs/uint_int"},
+        "answered_in_round": {"type": "string", "pattern": "^[0-9]+$"},
+        "decimals": {"type": "integer", "minimum": 0, "maximum": 255}
+      }
+    },
+    "snapshot": {
+      "type": "object",
+      "required": ["schema_version", "block", "timestamp", "base_fee_wei", "rpc_status", "buy_size_weth", "sell_size_link", "pools", "oracle_raw"],
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {"const": 1},
+        "block": {"$ref": "#/$defs/uint_int"},
+        "timestamp": {"$ref": "#/$defs/uint_int"},
+        "base_fee_wei": {"$ref": "#/$defs/uint_str"},
+        "rpc_status": {"$ref": "#/$defs/rpc_status"},
+        "buy_size_weth": {"$ref": "#/$defs/uint_str"},
+        "sell_size_link": {"$ref": "#/$defs/uint_str"},
+        "pools": {"$ref": "#/$defs/pools"},
+        "oracle_raw": {"$ref": "#/$defs/oracle_raw"}
+      }
+    },
+    "direction_stats": {
+      "type": "object",
+      "required": ["compared", "wins", "win_rate", "median_advantage", "max_advantage"],
+      "additionalProperties": false,
+      "properties": {
+        "compared": {"type": "integer", "minimum": 0},
+        "wins": {
+          "type": "object",
+          "patternProperties": {"^([0-9]+|tie)$": {"type": "integer", "minimum": 0}},
+          "additionalProperties": false
+        },
+        "win_rate": {
+          "type": "object",
+          "patternProperties": {"^[0-9]+$": {"type": "number", "minimum": 0, "maximum": 1}},
+          "additionalProperties": false
+        },
+        "median_advantage": {"type": ["number", "null"], "minimum": 0},
+        "max_advantage": {"type": ["number", "null"], "minimum": 0}
+      }
+    },
+    "stats": {
+      "type": "object",
+      "required": ["window", "start_ts", "end_ts", "snapshots", "drift", "buy", "sell"],
+      "additionalProperties": false,
+      "properties": {
+        "window": {"type": ["string", "null"], "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}/[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+        "start_ts": {"type": ["integer", "null"], "minimum": 0},
+        "end_ts": {"type": ["integer", "null"], "minimum": 0},
+        "snapshots": {"type": "integer", "minimum": 0},
+        "drift": {
+          "type": "object",
+          "required": ["threshold", "compared", "rate"],
+          "additionalProperties": false,
+          "properties": {
+            "threshold": {"type": "number", "minimum": 0},
+            "compared": {"type": "integer", "minimum": 0},
+            "rate": {"type": ["number", "null"], "minimum": 0, "maximum": 1}
+          }
+        },
+        "buy": {"$ref": "#/$defs/direction_stats"},
+        "sell": {"$ref": "#/$defs/direction_stats"}
+      }
+    }
+  }
+}
