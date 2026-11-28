@@ -1,0 +1,10 @@
+{
+  "fee_tier": "The percentage of trade volume collected by liquidity providers. Lower tiers are cheaper but might have less liquidity for large trades.",
+  "liquidity": "The volume of tokens available in the pool. Higher liquidity reduces price impact/slippage.",
+  "price_impact": "The effect that a trade has on the price of the asset within the pool, based on size relative to pool liquidity.",
+  "slippage": "The difference between the expected price of a trade and the price at which the trade actually executes.",
+  "quote": "The exact output amount calculated by Uniswap v3 QuoterV2 for a specific input size.",
+  "oracle": "An on-chain data feed (like Chainlink) used to verify asset prices independently.",
+  "impermanent_loss": "The difference in value between holding tokens directly versus providing liquidity to a pool.",
+  "tick": "The boundary unit representing a 0.01% price movement in Uniswap v3."
+}

@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "block": 23847120,
+  "timestamp": 1764000000,
+  "base_fee_wei": "8500000000",
+  "rpc_status": "ok",
+  "pools": [
+    {
+      "fee": 3000,
+      "pool": "0x514910771AF9Ca656af840dff83E8264EcF986CA",
+      "sqrt_price_x96": "1771595571142957166518320255467520",
+      "liquidity": "48211034417892211",
+      "price_weth_per_link": 0.00512,
+      "quote_buy_link_out": "58412300000000000000",
+      "quote_sell_weth_out": "255100000000000000"
+    },
+    {
+      "fee": 10000,
+      "pool": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "sqrt_price_x96": "1773000000000000000000000000000000",
+      "liquidity": "25000000000000000",
+      "price_weth_per_link": 0.00515,
+      "quote_buy_link_out": "58200000000000000000",
+      "quote_sell_weth_out": "254000000000000000"
+    }
+  ],
+  "oracle_raw": {"round_id": "1", "answer": "5120000000000000", "updated_at": 1763998800},
+  "stats": {
+    "window": "2026-11-23/2026-11-30",
+    "snapshots": 2016,
+    "buy": {
+      "0.3%": {"win_rate": 82.0, "median_adv": 0.15, "max_adv": 1.2},
+      "1.0%": {"win_rate": 18.0, "median_adv": 0.05, "max_adv": 0.8}
+    },
+    "sell": {
+      "0.3%": {"win_rate": 78.0, "median_adv": 0.12, "max_adv": 1.1},
+      "1.0%": {"win_rate": 22.0, "median_adv": 0.04, "max_adv": 0.7}
+    },
+    "drift": 0.0045
+  }
+}

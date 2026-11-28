@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uniswap Live Tracker Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .banner { display: none; margin-bottom: 15px; }
+        .winner-highlight { background-color: #d1e7dd !important; font-weight: bold; }
+        .tooltip-custom { cursor: help; border-bottom: 1px dashed #6c757d; }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container my-4">
+        <header class="pb-3 mb-4 border-bottom d-flex justify-content-between align-items-center">
+            <span class="fs-4 fw-bold text-primary">Uniswap Live Tracker Dashboard</span>
+            <span id="update-label" class="badge bg-secondary">Waiting for first poll...</span>
+        </header>
+
+        <!-- Dynamic Warning Banners -->
+        <div id="banner-oracle" class="alert alert-warning banner">⚠️ Oracle unavailable: sanity check off</div>
+        <div id="banner-rpc" class="alert alert-danger banner">⚠️ RPC error, showing last known prices</div>
+        <div id="banner-abnormal" class="alert alert-warning banner">⚠️ Price looks abnormal (deviates from Chainlink > 5%)</div>
+        <div id="banner-quote" class="alert alert-secondary banner">⚠️ Quote unavailable</div>
+        <div id="banner-cache" class="alert alert-info banner">⚠️ Waiting for first poll...</div>
+
+        <div class="row">
+            <!-- Left Panel: Live Data Metrics -->
+            <div class="col-lg-7">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 text-dark">Live Quotes Table (LINK / WETH)</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Pool <span class="tooltip-custom" data-term="fee_tier">Fee Tier</span></th>
+                                    <th>Price (WETH/LINK)</th>
+                                    <th>Buy Quote <span class="tooltip-custom" data-term="quote">(LINK out)</span></th>
+                                    <th>Sell Quote <span class="tooltip-custom" data-term="quote">(WETH out)</span></th>
+                                    <th><span class="tooltip-custom" data-term="liquidity">Liquidity</span></th>
+                                </tr>
+                            </thead>
+                            <tbody id="quotes-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card mb-4 shadow-sm border-success">
+                    <div class="card-header bg-success text-white py-3">
+                        <h5 class="mb-0">Live Recommendation</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small">Informational only. A quote is not a guaranteed price: it can change before a trade executes.</p>
+                        <div class="row">
+                            <div class="col-md-6 border-end">
+                                <h6>📈 BUYING LINK (Input: 0.3 WETH)</h6>
+                                <p id="rec-buy-text" class="fs-5 fw-bold text-success">-</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>📉 SELLING LINK (Input: 50 LINK)</h6>
+                                <p id="rec-sell-text" class="fs-5 fw-bold text-success">-</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Historical Performance & Glossary -->
+            <div class="col-lg-5">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 text-dark">📊 7-Day Statistics Panel</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small">Date Range: <span id="stats-window">-</span> (<span id="stats-snapshots">0</span> snapshots)</p>
+                        <h6 class="fw-bold text-secondary">Buying LINK Preference</h6>
+                        <ul class="list-unstyled ps-2">
+                            <li>0.3% Pool Win Rate: <span id="stats-buy-03-win">-</span></li>
+                            <li>1.0% Pool Win Rate: <span id="stats-buy-10-win">-</span></li>
+                            <li>Median Winning Advantage: <span id="stats-buy-med-adv">-</span></li>
+                        </ul>
+                        <h6 class="fw-bold text-secondary mt-3">Selling LINK Preference</h6>
+                        <ul class="list-unstyled ps-2">
+                            <li>0.3% Pool Win Rate: <span id="stats-sell-03-win">-</span></li>
+                            <li>1.0% Pool Win Rate: <span id="stats-sell-10-win">-</span></li>
+                            <li>Median Winning Advantage: <span id="stats-sell-med-adv">-</span></li>
+                        </ul>
+                        <p class="small text-muted mt-2">Pool Price Drift: <span id="stats-drift">-</span></p>
+                    </div>
+                </div>
+
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 text-dark">📖 Glossary Explanation</h5>
+                    </div>
+                    <div class="card-body" id="glossary-section">
+                        <p class="text-muted">Hover over terms with dashed underlines to see definitions here.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
