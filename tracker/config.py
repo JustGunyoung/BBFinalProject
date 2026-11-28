@@ -33,7 +33,7 @@ TOKEN1 = {"address": WETH, "symbol": "WETH", "decimals": 18}
 CANDIDATE_FEE_TIERS = (500, 3000, 10000)
 # The factory pairs each fee tier with one tick spacing.
 TICK_SPACINGS = {500: 10, 3000: 60, 10000: 200}
-FEE_TIERS = (3000, 10000)  # placeholder until preflight
+FEE_TIERS = (500, 3000)  # the two deepest tiers in preflight (block 26512506); 10000 was far shallower
 
 # --- Reference trade sizes (raw units, 18 decimals) --------------------------
 BUY_SIZE_WETH = 3 * 10**17  # 0.3 WETH in, LINK out
